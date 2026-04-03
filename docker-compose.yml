@@ -9,7 +9,8 @@ services:
       - "8080:8080"
     env_file:
       - cmd/auction/.env
-    command: sh -c "/auction"
+    depends_on:
+      - mongodb
     networks:
       - localNetwork
 
@@ -22,6 +23,23 @@ services:
       - cmd/auction/.env
     volumes:
       - mongo-data:/data/db
+    networks:
+      - localNetwork
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    env_file:
+      - cmd/auction/.env
+    environment:
+      - MONGODB_URL=mongodb://admin:admin@mongodb:27017/auctions_test?authSource=admin
+      - MONGODB_DB=auctions_test
+      - AUCTION_DURATION=2s
+    depends_on:
+      - mongodb
+    profiles:
+      - test
     networks:
       - localNetwork
 
